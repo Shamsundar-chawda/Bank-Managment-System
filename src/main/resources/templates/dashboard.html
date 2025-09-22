@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard | BankEase</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;           /* Vibrant blue */
+            --primary-light: #3b82f6;     /* Lighter blue */
+            --primary-dark: #1d4ed8;      /* Darker blue */
+            --accent: #10b981;            /* Emerald green */
+            --dark: #1e293b;              /* Dark slate */
+            --light: #f8fafc;             /* Lightest gray */
+            --surface: #ffffff;           /* White */
+            --text: #334155;              /* Dark gray */
+            --text-muted: #64748b;        /* Medium gray */
+            --border: #e2e8f0;            /* Light gray */
+            --error: #ef4444;             /* Red */
+            --success: #10b981;           /* Green */
+            --warning: #f59e0b;           /* Amber */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Glassmorphism navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .nav-link {
+            color: var(--text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            margin: 0 0.25rem;
+            position: relative;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1rem;
+            right: 1rem;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Main content */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+        }
+
+        /* Welcome section */
+        .welcome-section {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--gradient);
+        }
+
+        .welcome-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+        }
+
+        .welcome-title span {
+            color: var(--primary);
+        }
+
+        .welcome-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Balance card */
+        .balance-card {
+            background: var(--gradient);
+            color: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .balance-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            letter-spacing: -1px;
+        }
+
+        /* Account details */
+        .account-details {
+            background: transparent;
+            border-radius: var(--radius-md);
+            padding: 1.5rem 0;
+            margin: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .account-details h5 {
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Action cards */
+        .action-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            transition: var(--transition);
+            height: 100%;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .action-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .action-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn-action {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-action i {
+            font-size: 1rem;
+        }
+
+        /* Forms */
+        .form-container {
+            margin-top: 1.5rem;
+        }
+
+        .form-control {
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            color: var(--text);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-label {
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Alerts */
+        .alert-message {
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin: 1.5rem 0 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-left: 4px solid transparent;
+        }
+
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border-left-color: var(--error);
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-left-color: var(--success);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--surface);
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .balance-amount {
+                font-size: 2rem;
+            }
+            
+            .action-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .welcome-section {
+                padding: 1.5rem;
+            }
+            
+            .balance-card {
+                padding: 1.25rem;
+            }
+            
+            .action-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-section, .action-card {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .action-card:nth-child(1) { animation-delay: 0.1s; }
+        .action-card:nth-child(2) { animation-delay: 0.2s; }
+        .action-card:nth-child(3) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-university"></i>
+            BankEase
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/dashboard">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/transactions">
+                        <i class="fas fa-exchange-alt me-1"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">
+                        <i class="fas fa-user me-1"></i> Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h1 class="welcome-title">Welcome back, <span th:text="${account.username}">User</span></h1>
+        <p class="welcome-subtitle">Here's your current financial overview</p>
+        
+        <div class="balance-card">
+            <p class="balance-title">Available Balance</p>
+            <h2 class="balance-amount" th:text="'₹' + ${#numbers.formatDecimal(account.balance, 1, 'COMMA', 2, 'POINT')}"></h2>
+        </div>
+        
+        <div class="account-details">
+            <h5>Account Details</h5>
+            <div class="detail-item">
+                <span class="detail-label">Account Number</span>
+                <span class="detail-value" th:text="${account.id}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Account Type</span>
+                <span class="detail-value">Savings</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Member Since</span>
+                <span class="detail-value" id="joinDate"></span>
+                <script>
+                    document.getElementById('joinDate').textContent = new Date().toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="action-card text-center">
+                <div class="action-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <h5 class="action-title">Deposit Funds</h5>
+                <p class="action-description">Add money to your account instantly</p>
+                <button class="btn btn-action" type="button" data-bs-toggle="collapse" data-bs-target="#depositForm">
+                    <i class="fas fa-plus"></i> Deposit
+                </button>
+                <div class="collapse mt-3" id="depositForm">
+                    <form method="post" action="/deposit" class="form-container text-start">
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" name="amount" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-arrow-circle-down"></i> Confirm Deposit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6">
+            <div class="action-card text-center">
+                <div class="action-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h5 class="action-title">Withdraw Funds</h5>
+                <p class="action-description">Take out money from your account</p>
+                <button class="btn btn-action" type="button" data-bs-toggle="collapse" data-bs-target="#withdrawForm">
+                    <i class="fas fa-minus"></i> Withdraw
+                </button>
+                <div class="collapse mt-3" id="withdrawForm">
+                    <form method="post" action="/withdraw" class="form-container text-start">
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" name="amount" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-arrow-circle-up"></i> Confirm Withdrawal
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-12">
+            <div class="action-card text-center">
+                <div class="action-icon">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <h5 class="action-title">Transfer Money</h5>
+                <p class="action-description">Send money to another account</p>
+                <button class="btn btn-action" type="button" data-bs-toggle="collapse" data-bs-target="#transferForm">
+                    <i class="fas fa-exchange-alt"></i> Transfer
+                </button>
+                <div class="collapse mt-3" id="transferForm">
+                    <form method="post" action="/transfer" class="form-container text-start">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient Username</label>
+                            <input type="text" class="form-control" name="toUsername" placeholder="Enter username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" step="0.01" class="form-control" name="amount" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="btn btn-submit">
+                            <i class="fas fa-paper-plane"></i> Send Transfer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${param.error}" class="alert-message alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${param.error}"></span>
+    </div>
+    <div th:if="${param.success}" class="alert-message alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${param.success}"></span>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms of Service</a>
+            <a href="#" class="footer-link">Security</a>
+            <a href="#" class="footer-link">Help Center</a>
+            <a href="#" class="footer-link">Contact Us</a>
+        </div>
+        <div class="copyright">
+            &copy; 2025 BankEase. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

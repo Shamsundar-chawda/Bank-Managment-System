@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Login | BankEase</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;           /* Vibrant blue */
+            --primary-hover: #1d4ed8;      /* Darker blue */
+            --accent: #10b981;            /* Emerald green */
+            --dark: #1e293b;               /* Deep navy */
+            --light: #f8fafc;              /* Off-white */
+            --surface: #ffffff;            /* Pure white */
+            --text: #334155;              /* Dark gray */
+            --text-light: #64748b;         /* Medium gray */
+            --border: #e2e8f0;             /* Light gray */
+            --error: #ef4444;              /* Red */
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --rounded-sm: 8px;
+            --rounded: 12px;
+            --rounded-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        /* Glassmorphism effect */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--rounded-lg);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        /* Modern navbar */
+        .navbar-modern {
+            background: transparent !important;
+            padding: 1rem 2rem;
+        }
+
+        .navbar-modern .navbar-brand {
+            font-weight: 700;
+            color: var(--dark) !important;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-modern .navbar-brand i {
+            color: var(--primary);
+        }
+
+        .social-icons a {
+            color: var(--text-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Login container */
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem;
+        }
+
+        .auth-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .auth-header h2 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .auth-header p {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--rounded-sm);
+            padding: 0.75rem 1rem;
+            height: auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9375rem;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-light);
+            opacity: 0.6;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        /* Button */
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--rounded-sm);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            font-size: 0.9375rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        .auth-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .link {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .link:hover {
+            color: var(--primary-hover);
+        }
+
+        .link:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1.5px;
+            bottom: -2px;
+            left: 0;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .link:hover:after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Alert */
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+            border-radius: var(--rounded-sm);
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Checkbox */
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            width: 1.1em;
+            height: 1.1em;
+            margin-right: 0.5rem;
+            margin-top: 0;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Footer */
+        .footer-modern {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: transparent;
+            color: var(--text-light);
+            padding: 1rem;
+            font-size: 0.8125rem;
+            text-align: center;
+            z-index: -1;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-container {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            .navbar-modern {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-modern fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-university"></i>
+            BankEase
+        </a>
+        <div class="social-icons">
+            <a href="https://github.com/shreedharS" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/shreedharsk/" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="#" title="Contact">
+                <i class="fas fa-envelope"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="glass-card auth-container">
+    <div class="auth-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to access your account</p>
+    </div>
+    
+    <form method="post" action="/login">
+        <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" required>
+            <i class="fas fa-user form-icon"></i>
+        </div>
+        
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password" required>
+            <i class="password-toggle fas fa-eye" onclick="togglePasswordVisibility()"></i>
+        </div>
+        
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">Remember me</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="/register" class="link">Create one</a></p>
+            <p><a href="/forgot-password" class="link">Forgot password?</a></p>
+        </div>
+    </form>
+
+    <div th:if="${param.error}" class="alert-error text-center">
+        Invalid username or password. Please try again.
+    </div>
+</div>
+
+<footer class="footer-modern">
+    <p class="mb-0">&copy; 2025 BankEase | All rights reserved</p>
+</footer>
+
+<script>
+    function togglePasswordVisibility() {
+        const passwordField = document.getElementById("password");
+        const eyeIcon = document.querySelector('.password-toggle');
+        
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = "password";
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

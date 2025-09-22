@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Register |  BankEase</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;           /* Vibrant blue */
+            --primary-hover: #1d4ed8;     /* Slightly darker blue */
+            --accent: #10b981;            /* Emerald green */
+            --dark: #1e293b;              /* Dark slate */
+            --light: #f8fafc;             /* Lightest gray */
+            --surface: #ffffff;           /* White */
+            --text: #334155;              /* Dark gray */
+            --text-muted: #64748b;        /* Medium gray */
+            --border: #e2e8f0;            /* Light gray */
+            --error: #ef4444;             /* Red */
+            --success: #10b981;           /* Green */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Glassmorphism navbar */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-weight: 700;
+            color: var(--dark) !important;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-custom .social-icons a {
+            color: var(--text);
+            transition: var(--transition);
+            margin-left: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .navbar-custom .social-icons a:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Modern registration container */
+        .register-container {
+            max-width: 480px;
+            width: 100%;
+            padding: 2.5rem;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 2rem 0;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .register-container h2 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        /* Modern form styling */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            height: auto;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .password-strength::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: var(--error);
+            transition: var(--transition);
+        }
+
+        .password-strength[data-strength="1"]::after {
+            width: 25%;
+            background: var(--error);
+        }
+
+        .password-strength[data-strength="2"]::after {
+            width: 50%;
+            background: #f59e0b;
+        }
+
+        .password-strength[data-strength="3"]::after {
+            width: 75%;
+            background: #84cc16;
+        }
+
+        .password-strength[data-strength="4"]::after {
+            width: 100%;
+            background: var(--success);
+        }
+
+        /* Password toggle */
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .password-toggle-icon:hover {
+            color: var(--primary);
+        }
+
+        /* Modern button */
+        .btn-submit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: var(--transition);
+            background: linear-gradient(to right, var(--primary), var(--primary-hover));
+            color: white;
+            border: none;
+            font-size: 1rem;
+            margin-top: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        .custom-link {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .custom-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .custom-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .custom-link:hover::after {
+            width: 100%;
+        }
+
+        .sub-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Validation styles */
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            color: var(--error);
+        }
+
+        .was-validated .form-control:invalid,
+        .form-control.is-invalid {
+            border-color: var(--error);
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .was-validated .form-control:invalid ~ .invalid-feedback,
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        .was-validated .form-check-input:invalid ~ .form-check-label {
+            color: var(--error);
+        }
+
+        .was-validated .form-check-input:invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* Checkbox styling */
+        .form-check-input {
+            width: 1.1em;
+            height: 1.1em;
+            margin-top: 0.15em;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            font-size: 0.85rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .register-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            
+            .navbar-custom .navbar-brand {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .register-container {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Floating labels */
+        .floating-label-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 1rem;
+            top: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+            transition: var(--transition);
+            transform-origin: left center;
+        }
+
+        .form-control:focus + .floating-label,
+        .form-control:not(:placeholder-shown) + .floating-label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-university"></i>
+             BankEase
+        </a>
+        <div class="ml-auto social-icons">
+            <a href="https://github.com/Ganesh-M11" target="_blank" title="GitHub" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/Ganesh./" target="_blank" title="LinkedIn" aria-label="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="container d-flex flex-column align-items-center justify-content-center flex-grow-1">
+    <div class="register-container">
+        <h2 class="text-center">Create Account</h2>
+        <form id="registerForm" method="post" action="/register" novalidate>
+            <div class="floating-label-group">
+                <input type="text" class="form-control" name="username" id="username" placeholder="Username" required minlength="3">
+                <label class="floating-label">Username</label>
+                <div class="invalid-feedback">Username must be at least 3 characters.</div>
+            </div>
+            
+            <div class="floating-label-group">
+                <input type="email" class="form-control" name="email" id="email" placeholder="Email" required>
+                <label class="floating-label">Email</label>
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+            </div>
+            
+            <div class="floating-label-group">
+                <input type="tel" class="form-control" name="mobile" id="mobile" placeholder="Mobile" required pattern="^\d{10}$">
+                <label class="floating-label">Mobile Number</label>
+                <div class="invalid-feedback">Mobile number must be exactly 10 digits.</div>
+            </div>
+            
+            <div class="floating-label-group password-toggle">
+                <input type="text" class="form-control" name="pancard" id="pancard" 
+                       placeholder="pancard" required
+                       pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{9,}$"
+                       title="Password must be more than 8 characters, with one uppercase, one lowercase, one number, and one special character."
+                       oninput="checkPasswordStrength(this.value)">
+                <label class="floating-label">Pancard</label>
+                <i class="fas fa-eye password-toggle-icon" id="togglePassword"></i>
+                <div class="password-strength" id="passwordStrength"></div>
+                <div class="invalid-feedback">
+                    Password must be 9+ characters with uppercase, lowercase, number, and special character (@$!%*?&).
+                </div>
+            </div>
+            
+            <div class="floating-label-group password-toggle">
+                <input type="text" class="form-control" name="password" id="password" placeholder="Pan Card Autfill Password" required>
+                <label class="floating-label">Password</label>
+                <i class="fas fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
+                
+  <button type="button" onclick="copyPanToPassword()">Use PAN as Password</button>
+  <script>
+  function copyPanToPassword() {
+    const pancard = document.getElementById("pancard").value;
+    document.getElementById("password").value = pancard;
+  }
+</script>
+                <div class="invalid-feedback">Passwords do not match.</div>
+                
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="check-pwd" onclick="togglePasswordVisibility()">
+                    <label class="form-check-label" for="check-pwd">Show Passwords</label>
+                </div>
+            </div>
+            
+            <div class="form-group form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="terms" required>
+                <label class="form-check-label" for="terms">I agree to the <a href="/terms" class="custom-link">Terms and Conditions</a></label>
+                <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+            </div>
+            
+            <button type="submit" class="btn btn-submit">
+                <span>Create Account</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+        
+        <p class="text-center mt-4 sub-text">Already have an account? <a href="/login" class="custom-link">Sign in here</a></p>
+        
+        <div th:if="${error}" class="alert alert-danger mt-3 text-center" th:text="${error}">
+            <i class="fas fa-exclamation-circle me-2"></i>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p class="mb-0">&copy; 2025  BankEase | All rights reserved</p>
+    </div>
+</footer>
+
+<script>
+    // Password visibility toggle
+    const togglePassword = document.querySelector('#togglePassword');
+    const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+    const password = document.querySelector('#password');
+    const confirmPassword = document.querySelector('#confirmPassword');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+
+    // Toggle both passwords visibility
+    function togglePasswordVisibility() {
+        const checkBox = document.getElementById("check-pwd");
+        if (checkBox.checked) {
+            password.type = "text";
+            confirmPassword.type = "text";
+            togglePassword.classList.replace('fa-eye', 'fa-eye-slash');
+            toggleConfirmPassword.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            password.type = "password";
+            confirmPassword.type = "password";
+            togglePassword.classList.replace('fa-eye-slash', 'fa-eye');
+            toggleConfirmPassword.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        const strengthBar = document.getElementById('passwordStrength');
+        let strength = 0;
+        
+        // Check length
+        if (password.length > 8) strength++;
+        
+        // Check for uppercase letters
+        if (/[A-Z]/.test(password)) strength++;
+        
+        // Check for numbers
+        if (/[0-9]/.test(password)) strength++;
+        
+        // Check for special characters
+        if (/[@$!%*?&]/.test(password)) strength++;
+        
+        strengthBar.setAttribute('data-strength', strength);
+    }
+
+    // Form validation
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        const confirmPassword = document.getElementById('confirmPassword');
+        confirmPassword.classList.remove('is-invalid');
+        
+        let isFormValid = true;
+
+        // Check if passwords match
+        if (document.getElementById('password').value !== confirmPassword.value) {
+            confirmPassword.classList.add('is-invalid');
+            isFormValid = false;
+        }
+
+        // Check native validation
+        if (!this.checkValidity()) {
+            isFormValid = false;
+        }
+
+        if (!isFormValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        this.classList.add('was-validated');
+    });
+
+    // Add focus effects to floating labels
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.querySelector('.floating-label').style.color = 'var(--primary)';
+        });
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.querySelector('.floating-label').style.color = 'var(--text-muted)';
+            }
+        });
+        
+        // Initialize floating labels for pre-filled values
+        if (this.value) {
+            this.dispatchEvent(new Event('blur'));
+        }
+    });
+</script>
+</body>
+</html>
