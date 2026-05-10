@@ -27,3 +27,36 @@ FEATURES
 - HTML
 - CSS
 - Maven
+
+- ## Key Highlights
+
+- Implemented secure authentication and authorization
+- Used JPA repositories for database operations
+- Applied MVC architecture for clean code structure
+- Integrated MySQL database for persistent storage
+- Developed transaction management functionality
+
+- ## Project Structure
+
+- Controller Layer
+- Service Layer
+- Repository Layer
+- Model Layer
+- Security Configuration
+- Thymeleaf Templates
+
+- ## Future Enhancements
+
+- Fund Transfer Between Accounts
+- Email Notifications
+- OTP Verification
+- Account Statement PDF Download
+- Role-based Admin Dashboard
+- JWT Authentication
+
+- ## Screenshots
+
+- Login Page
+- Registration Page
+- Dashboard
+- Deposit & Withdraw Module
