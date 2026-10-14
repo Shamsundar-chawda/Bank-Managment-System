@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,6 +21,9 @@ public class SecurityConfig implements WebMvcConfigurer{
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    private NavigationSecurityInterceptor navigationSecurityInterceptor;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -33,7 +37,7 @@ public class SecurityConfig implements WebMvcConfigurer{
 
                 .csrf(csrf-> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/register","/static/**","/").permitAll()
+                        .requestMatchers("/register", "/login", "/admin", "/log", "/error", "/h2-console/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -45,9 +49,15 @@ public class SecurityConfig implements WebMvcConfigurer{
                 .logout(logout -> logout
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
+                )
+                .sessionManagement(session -> session
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .expiredUrl("/login?expired")
                 )
                 .headers(header -> header
                         .frameOptions(frameOptions -> frameOptions.sameOrigin())
@@ -65,6 +75,12 @@ public class SecurityConfig implements WebMvcConfigurer{
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(navigationSecurityInterceptor)
+                .addPathPatterns("/dashboard", "/transactions", "/profile");
     }
 }
 

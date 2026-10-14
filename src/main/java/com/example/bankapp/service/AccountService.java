@@ -156,4 +156,23 @@ public class AccountService implements UserDetailsService {
         );
         transactionRepository.save(receiveTransaction);
     }
+
+    public void updateProfile(Account account, String fullName, String email, String phone, String address) {
+        account.setFullName(fullName != null ? fullName.trim() : null);
+        account.setEmail(email != null ? email.trim() : null);
+        account.setPhone(phone != null ? phone.trim() : null);
+        account.setAddress(address != null ? address.trim() : null);
+        accountRepository.save(account);
+    }
+
+    public void changePassword(Account account, String currentPassword, String newPassword) {
+        if (!passwordEncoder.matches(currentPassword, account.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+        if (newPassword == null || newPassword.trim().length() < 6) {
+            throw new RuntimeException("New password must be at least 6 characters long");
+        }
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
 }

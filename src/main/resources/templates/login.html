@@ -346,12 +346,20 @@
         
         <div class="auth-footer">
             <p>Don't have an account? <a href="/register" class="link">Create one</a></p>
-            <p><a href="/forgot-password" class="link">Forgot password?</a></p>
+            <p><a href="/admin" class="link text-muted" style="font-size: 0.85rem;"><i class="fas fa-user-shield me-1"></i>Admin Portal</a></p>
         </div>
     </form>
 
     <div th:if="${param.error}" class="alert-error text-center">
         Invalid username or password. Please try again.
+    </div>
+
+    <div th:if="${param.logout}" class="alert alert-info text-center mt-3" style="background: rgba(37,99,235,0.08); color: #2563eb; border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; font-size: 0.9rem; padding: 0.6rem;">
+        <i class="fas fa-check-circle me-1"></i> You have been logged out securely.
+    </div>
+
+    <div th:if="${param.expired}" class="alert alert-warning text-center mt-3" style="background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; font-size: 0.9rem; padding: 0.6rem;">
+        <i class="fas fa-shield-alt me-1"></i> Session expired due to inactivity or new sign-in. Please log in again.
     </div>
 </div>
 

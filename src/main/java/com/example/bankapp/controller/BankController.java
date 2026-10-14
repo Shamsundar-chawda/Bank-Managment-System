@@ -23,6 +23,11 @@ public class BankController {
     private static final String ADMIN_PASSWORD = "BankEase@123";
 
     @GetMapping("/")
+    public String index() {
+        return "redirect:/dashboard"; 
+    }
+
+    @GetMapping("/admin")
     public String adminLoginPage() {
         return "admin_login"; 
     }
@@ -131,5 +136,59 @@ public class BankController {
         }
 
         return "redirect:/dashboard";
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model,
+                          @RequestParam(required = false) String success,
+                          @RequestParam(required = false) String error) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Account account = accountService.findAccountByUsername(username);
+
+        model.addAttribute("account", account);
+        if (success != null) {
+            model.addAttribute("success", success);
+        }
+        if (error != null) {
+            model.addAttribute("error", error);
+        }
+        return "profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String address) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Account account = accountService.findAccountByUsername(username);
+
+        try {
+            accountService.updateProfile(account, fullName, email, phone, address);
+            return "redirect:/profile?success=Profile+updated+successfully!";
+        } catch (RuntimeException e) {
+            return "redirect:/profile?error=" + e.getMessage();
+        }
+    }
+
+    @PostMapping("/profile/change-password")
+    public String changePassword(
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Account account = accountService.findAccountByUsername(username);
+
+        if (!newPassword.equals(confirmPassword)) {
+            return "redirect:/profile?error=New+passwords+do+not+match!";
+        }
+
+        try {
+            accountService.changePassword(account, currentPassword, newPassword);
+            return "redirect:/profile?success=Password+changed+successfully!";
+        } catch (RuntimeException e) {
+            return "redirect:/profile?error=" + e.getMessage();
+        }
     }
 }

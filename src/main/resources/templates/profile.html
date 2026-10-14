@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>My Profile | BankEase</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --surface: #ffffff;
+            --text: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* Glassmorphism navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            color: var(--primary);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.08);
+        }
+
+        .profile-container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* User Header Banner */
+        .profile-hero {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--gradient);
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            text-transform: uppercase;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+        }
+
+        .badge-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Cards */
+        .card-custom {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .card-custom:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .card-header-clean {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header-clean h4 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-header-clean i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 0.9rem;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: #fafbfd;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background-color: #ffffff;
+        }
+
+        .form-control[readonly] {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+            color: var(--text-muted);
+        }
+
+        .input-group-text {
+            background-color: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+        }
+
+        .btn-primary-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .btn-primary-action:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-outline-action {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            padding: 0.65rem 1.25rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .btn-outline-action:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--primary-dark);
+        }
+
+        /* Stat items */
+        .stat-badge {
+            background: #f1f5f9;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-badge .stat-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-badge .stat-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Password eye icon */
+        .pwd-toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard?nav=click">
+            <i class="fas fa-university"></i>
+            BankEase
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard?nav=click">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/transactions?nav=click">
+                        <i class="fas fa-exchange-alt me-1"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/profile?nav=click">
+                        <i class="fas fa-user me-1"></i> Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Profile Area -->
+<div class="profile-container">
+
+    <!-- Direct URL Blocked Security Alert -->
+    <div th:if="${param.security_alert}" class="alert alert-warning alert-dismissible fade show d-flex align-items-center mb-4" role="alert" style="border-radius: 12px; border-left: 5px solid #f59e0b;">
+        <i class="fas fa-shield-alt me-2 fs-5 text-warning"></i>
+        <div><strong>Direct URL Navigation Blocked:</strong> Changing the browser address bar directly is prohibited for banking security. Please use the on-screen menu icons to navigate.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Success / Error Alert Feedback -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+        <i class="fas fa-check-circle me-2 fs-5"></i>
+        <div th:text="${success}">Profile action successful!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+        <i class="fas fa-exclamation-triangle me-2 fs-5"></i>
+        <div th:text="${error}">Something went wrong.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Hero Card -->
+    <div class="profile-hero">
+        <div class="row align-items-center">
+            <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
+                <div class="avatar-circle mx-auto" th:text="${account.fullName != null && !account.fullName.isEmpty() ? #strings.substring(account.fullName,0,1) : #strings.substring(account.username,0,1)}">
+                    U
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
+                    <h2 class="mb-0 fw-bold" th:text="${account.fullName != null && !account.fullName.isEmpty() ? account.fullName : account.username}">User</h2>
+                    <span class="badge-status">Active Account</span>
+                </div>
+                <p class="text-muted mb-2 text-center text-md-start">
+                    <i class="fas fa-at me-1"></i> <span th:text="${account.username}">username</span>
+                    <span th:if="${account.email}" class="ms-3"><i class="fas fa-envelope me-1"></i> <span th:text="${account.email}">user@bankease.com</span></span>
+                </p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+                    <span class="badge bg-light text-dark border">
+                        <i class="fas fa-hashtag me-1 text-primary"></i> Account: <strong th:text="${account.id}">1234567890</strong>
+                    </span>
+                    <span class="badge bg-light text-dark border">
+                        <i class="fas fa-shield-alt me-1 text-success"></i> Savings Account
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-auto text-center text-md-end mt-3 mt-md-0">
+                <div class="stat-badge">
+                    <div class="stat-title">Current Balance</div>
+                    <div class="stat-val text-primary" th:text="'₹' + ${#numbers.formatDecimal(account.balance, 1, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="row">
+        <!-- Edit Profile Form -->
+        <div class="col-lg-7">
+            <div class="card-custom">
+                <div class="card-header-clean">
+                    <i class="fas fa-id-card"></i>
+                    <h4>Personal Information</h4>
+                </div>
+                <form action="/profile/update" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="username">Username (Account Identifier)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-lock"></i></span>
+                                <input type="text" id="username" class="form-control" th:value="${account.username}" readonly>
+                            </div>
+                            <small class="text-muted">Username cannot be changed.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="accountId">Account Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                <input type="text" id="accountId" class="form-control" th:value="${account.id}" readonly>
+                            </div>
+                            <small class="text-muted">Primary banking account ID.</small>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label" for="fullName">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" id="fullName" name="fullName" class="form-control" 
+                                       placeholder="Enter your full name" 
+                                       th:value="${account.fullName}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" id="email" name="email" class="form-control" 
+                                       placeholder="name@example.com" 
+                                       th:value="${account.email}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="phone">Phone / Mobile Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" id="phone" name="phone" class="form-control" 
+                                       placeholder="10-digit mobile number" 
+                                       pattern="^\d{10}$"
+                                       title="Please enter a valid 10-digit phone number"
+                                       th:value="${account.phone}">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="address">Residential Address</label>
+                            <textarea id="address" name="address" class="form-control" rows="3" 
+                                      placeholder="Street address, City, State, PIN Code" 
+                                      th:text="${account.address}"></textarea>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-action">
+                                <i class="fas fa-save"></i> Save Profile Details
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security & Actions Column -->
+        <div class="col-lg-5">
+            <!-- Change Password Card -->
+            <div class="card-custom">
+                <div class="card-header-clean">
+                    <i class="fas fa-lock"></i>
+                    <h4>Change Password</h4>
+                </div>
+                <form action="/profile/change-password" method="POST" id="passwordForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="currentPassword">Current Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control" required placeholder="Enter current password">
+                            <button type="button" class="input-group-text pwd-toggle-btn" onclick="toggleVisibility('currentPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="newPassword">New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" minlength="6" required placeholder="Minimum 6 characters">
+                            <button type="button" class="input-group-text pwd-toggle-btn" onclick="toggleVisibility('newPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" minlength="6" required placeholder="Repeat new password">
+                            <button type="button" class="input-group-text pwd-toggle-btn" onclick="toggleVisibility('confirmPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-action w-100">
+                        <i class="fas fa-key me-1"></i> Update Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick Actions / Safety Card -->
+            <div class="card-custom">
+                <div class="card-header-clean">
+                    <i class="fas fa-shield-virus"></i>
+                    <h4>Security & Safety</h4>
+                </div>
+                <p class="text-muted small mb-3">
+                    <i class="fas fa-info-circle text-primary me-1"></i> BankEase will never contact you asking for your password, PIN, or confidential banking information.
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="/dashboard?nav=click" class="btn btn-light border text-start">
+                        <i class="fas fa-home me-2 text-primary"></i> Return to Dashboard
+                    </a>
+                    <a href="/transactions?nav=click" class="btn btn-light border text-start">
+                        <i class="fas fa-receipt me-2 text-success"></i> View All Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 BankEase | Secure Digital Banking System</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (window.location.search.includes('nav=click')) {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+    }
+
+    function toggleVisibility(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('i');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Client-side password match verification
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        if (newPassword !== confirmPassword) {
+            e.preventDefault();
+            alert("New passwords do not match!");
+        }
+    });
+</script>
+</body>
+</html>
