@@ -1,111 +1,394 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <title>Admin Sign In | BankEase</title>
     <meta charset="UTF-8">
-    <title>BankEase | Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#081a33">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            color-scheme: light;
+            --navy: #081a33;
+            --navy-soft: #10294c;
+            --blue: #3678f6;
+            --blue-dark: #245ed0;
+            --ink: #17243a;
+            --muted: #708098;
+            --line: #e5ebf3;
+            --paper: #ffffff;
         }
 
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-            height: 100vh;
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            grid-template-columns: minmax(340px, 1fr) minmax(420px, 0.92fr);
+            background: #f5f7fb;
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+        a { color: inherit; }
+        .brand-panel {
+            position: relative;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #333;
-        }
-
-        .login-container {
-            background: #ffffff;
-            padding: 40px 35px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 380px;
-            text-align: center;
-        }
-
-        .login-container h1 {
-            color: #203a43;
-            margin-bottom: 25px;
-            font-size: 26px;
-            font-weight: bold;
-        }
-
-        .login-container h1 span {
-            color: #4facfe;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 15px;
-            margin: 10px 0 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 8px rgba(79, 172, 254, 0.3);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            border: none;
-            border-radius: 8px;
+            min-height: 100vh;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: clamp(32px, 5vw, 72px);
+            background:
+                radial-gradient(ellipse at 18% 18%, rgba(54, 120, 246, .28), transparent 34%),
+                radial-gradient(ellipse at 86% 88%, rgba(23, 185, 167, .16), transparent 30%),
+                linear-gradient(145deg, var(--navy) 0%, #0d2444 58%, #102f52 100%);
             color: white;
+        }
+        .brand-panel::after {
+            position: absolute;
+            right: -170px;
+            bottom: 7%;
+            width: 440px;
+            height: 440px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 50%;
+            box-shadow: 0 0 0 38px rgba(255,255,255,.025), 0 0 0 82px rgba(255,255,255,.02);
+            content: "";
+            pointer-events: none;
+        }
+        .brand, .brand-copy, .brand-foot { position: relative; z-index: 1; }
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            width: fit-content;
+            color: #fff;
+            font-size: 19px;
+            font-weight: 750;
+            letter-spacing: -.4px;
+            text-decoration: none;
+        }
+        .brand-mark {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 14px;
+            background: rgba(255,255,255,.1);
+            color: #8db6ff;
+        }
+        .brand-copy { max-width: 570px; margin: auto 0; padding: 60px 0; }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0 0 22px;
+            color: #adc6ee;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+        .eyebrow::before {
+            width: 22px;
+            height: 2px;
+            background: #5e95ff;
+            content: "";
+        }
+        .brand-copy h1 {
+            max-width: 520px;
+            margin: 0;
+            font-size: clamp(40px, 5vw, 68px);
+            font-weight: 680;
+            letter-spacing: -3.3px;
+            line-height: 1.06;
+        }
+        .brand-copy h1 span { color: #8db6ff; }
+        .brand-copy > p {
+            max-width: 450px;
+            margin: 22px 0 0;
+            color: #b3c2d8;
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s ease;
+            line-height: 1.8;
         }
-
-        button:hover {
-            background: linear-gradient(to right, #00f2fe, #4facfe);
-        }
-
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .footer-text {
-            margin-top: 20px;
+        .trust-note {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-top: 38px;
+            color: #d7e2f1;
             font-size: 13px;
-            color: #666;
         }
-
-        @media (max-width: 450px) {
-            .login-container {
-                width: 90%;
-                padding: 30px 25px;
+        .trust-icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
+            place-items: center;
+            border: 1px solid rgba(141,182,255,.25);
+            border-radius: 13px;
+            background: rgba(74,125,213,.12);
+            color: #8db6ff;
+        }
+        .trust-note strong { display: block; margin-bottom: 3px; color: white; font-size: 13px; }
+        .brand-foot { color: #91a4bd; font-size: 12px; }
+        .form-panel {
+            display: grid;
+            min-height: 100vh;
+            place-items: center;
+            padding: 40px clamp(24px, 6vw, 90px);
+        }
+        .login-card { width: min(100%, 430px); animation: rise-in .55s ease both; }
+        .mobile-brand { display: none; }
+        .card-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            color: var(--blue-dark);
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+        .card-kicker span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 0 0 4px #e8f0ff;
+        }
+        .login-card h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(30px, 3vw, 38px);
+            font-weight: 720;
+            letter-spacing: -1.7px;
+        }
+        .intro { margin: 11px 0 32px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+        .error-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 22px;
+            padding: 13px 14px;
+            border: 1px solid #f7caca;
+            border-radius: 12px;
+            background: #fff4f3;
+            color: #a72d2a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block;
+            margin-bottom: 9px;
+            color: #34445c;
+            font-size: 13px;
+            font-weight: 650;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap svg {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            width: 18px;
+            height: 18px;
+            color: #8b9ab0;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .field input {
+            width: 100%;
+            height: 53px;
+            padding: 0 15px 0 44px;
+            border: 1px solid #dce4ef;
+            border-radius: 12px;
+            outline: none;
+            background: #fff;
+            color: var(--ink);
+            font: inherit;
+            font-size: 14px;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        .field input::placeholder { color: #a7b2c2; }
+        .field input:focus {
+            border-color: #6c9df8;
+            background: #fcfdff;
+            box-shadow: 0 0 0 4px rgba(54,120,246,.12);
+        }
+        .submit-button {
+            display: flex;
+            width: 100%;
+            height: 54px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(105deg, #3678f6, #2864dc);
+            box-shadow: 0 9px 20px rgba(45,104,224,.22);
+            color: #fff;
+            cursor: pointer;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            transition: transform .2s, box-shadow .2s, filter .2s;
+        }
+        .submit-button:hover { transform: translateY(-2px); box-shadow: 0 13px 24px rgba(45,104,224,.29); filter: brightness(1.04); }
+        .submit-button:focus-visible, a:focus-visible { outline: 3px solid #8db6ff; outline-offset: 3px; }
+        .form-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            color: #8390a3;
+            font-size: 13px;
+        }
+        .form-bottom a { color: #356edb; font-weight: 650; text-decoration: none; }
+        .form-bottom a:hover { text-decoration: underline; }
+        .secure-caption {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 32px;
+            color: #9aa6b7;
+            font-size: 11px;
+        }
+        @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 850px) {
+            body { grid-template-columns: 1fr; }
+            .brand-panel { display: none; }
+            .form-panel {
+                min-height: 100vh;
+                padding: 38px 24px;
+                background:
+                    radial-gradient(ellipse at 12% 0%, rgba(54,120,246,.12), transparent 35%),
+                    #f5f7fb;
             }
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 44px;
+                color: var(--navy);
+                font-size: 17px;
+                font-weight: 750;
+                text-decoration: none;
+            }
+            .mobile-brand .brand-mark { border-color: #dce6f4; background: #fff; color: var(--blue); }
+            .login-card { max-width: 450px; padding: 34px; border: 1px solid #e8edf4; border-radius: 20px; background: #fff; box-shadow: 0 18px 50px rgba(20,44,78,.09); }
+            .secure-caption { margin-top: 27px; }
+        }
+        @media (max-width: 480px) {
+            .form-panel { padding: 24px 17px; }
+            .mobile-brand { margin: 4px 0 30px 4px; }
+            .login-card { padding: 27px 22px; }
+            .intro { margin-bottom: 26px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>BankEase <span>Admin</span> Login</h1>
-        <form method="post" th:action="@{/log}">
-            <input type="text" name="username" placeholder="Admin Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p th:if="${error}" class="error" th:text="${error}"></p>
-        <p style="margin-top: 15px; font-size: 14px;">
-            <a href="/login" style="color: #4facfe; text-decoration: none; font-weight: 600;">&larr; Customer / User Login</a>
-        </p>
-        <div class="footer-text">Authorized personnel only</div>
+<aside class="brand-panel" aria-label="BankEase administrator portal">
+    <a class="brand" href="/admin" aria-label="BankEase Admin home">
+        <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="23" height="23" fill="none">
+                <path d="M3 9.2 12 4l9 5.2v1.6H3V9.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M5.5 11v7m4.3-7v7m4.4-7v7m4.3-7v7M3 20h18M4.2 18h15.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span>BankEase <span style="color:#8db6ff">Admin</span></span>
+    </a>
+
+    <div class="brand-copy">
+        <p class="eyebrow">Administrator access</p>
+        <h1>A clearer view of your <span>banking workspace.</span></h1>
+        <p>Sign in to access the BankEase administration portal through a secure, dedicated workspace.</p>
+        <div class="trust-note">
+            <span class="trust-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
+                    <path d="M12 3 19 6v5c0 4.6-2.8 8-7 10-4.2-2-7-5.4-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span><strong>Protected administrator sign-in</strong>Access is reserved for authorized administrators.</span>
+        </div>
     </div>
+
+    <div class="brand-foot">BankEase · Administration workspace</div>
+</aside>
+
+<main class="form-panel">
+    <section class="login-card" aria-labelledby="login-title">
+        <a class="mobile-brand" href="/admin">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                    <path d="M3 9.2 12 4l9 5.2v1.6H3V9.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                    <path d="M5.5 11v7m4.3-7v7m4.4-7v7m4.3-7v7M3 20h18M4.2 18h15.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>BankEase Admin</span>
+        </a>
+
+        <div class="card-kicker"><span></span> Secure administrator portal</div>
+        <h2 id="login-title">Welcome back</h2>
+        <p class="intro">Enter your administrator credentials to continue to your workspace.</p>
+
+        <div th:if="${param.error}" class="error-message" role="alert">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M10 6v4m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span>Those administrator credentials weren't recognized. Please try again.</span>
+        </div>
+
+        <form method="post" th:action="@{/login}">
+            <input type="hidden" name="adminLogin" value="true">
+            <div class="field">
+                <label for="username">Administrator username</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M5 20c.5-3.4 3.1-5.5 7-5.5s6.5 2.1 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                    <input id="username" name="username" type="text" placeholder="Enter your username"
+                           autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+                </div>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="4.5" y="10" width="15" height="10" rx="2.2" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M8 10V7.5a4 4 0 1 1 8 0V10m-4 4v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                    <input id="password" name="password" type="password" placeholder="Enter your password"
+                           autocomplete="current-password" required>
+                </div>
+            </div>
+            <button class="submit-button" type="submit">
+                <span>Sign in to admin portal</span>
+                <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+                    <path d="M4 10h11m-4-4 4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="form-bottom"><span>Not an administrator?</span><a href="/login">Customer sign in</a></div>
+        <div class="secure-caption">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Your sign-in is protected by BankEase security
+        </div>
+    </section>
+</main>
 </body>
 </html>

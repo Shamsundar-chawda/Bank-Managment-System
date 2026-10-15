@@ -324,7 +324,7 @@
         <p>Sign in to access your account</p>
     </div>
     
-    <form method="post" action="/login">
+    <form method="post" th:action="@{/login}">
         <div class="form-group">
             <label for="username" class="form-label">Username</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" required>

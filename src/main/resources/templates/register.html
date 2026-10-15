@@ -393,7 +393,7 @@
 <main class="container d-flex flex-column align-items-center justify-content-center flex-grow-1">
     <div class="register-container">
         <h2 class="text-center">Create Account</h2>
-        <form id="registerForm" method="post" action="/register" novalidate>
+        <form id="registerForm" method="post" th:action="@{/register}" novalidate>
             <div class="floating-label-group">
                 <input type="text" class="form-control" name="username" id="username" placeholder="Username" required minlength="3">
                 <label class="floating-label">Username</label>

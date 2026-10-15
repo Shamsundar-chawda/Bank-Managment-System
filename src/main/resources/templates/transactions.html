@@ -171,7 +171,11 @@
                     <a class="nav-link" href="/profile?nav=click"><i class="fas fa-user me-1"></i> Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+                    <form method="post" th:action="@{/logout}">
+                        <button class="nav-link border-0 bg-transparent" type="submit">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -186,6 +190,24 @@
     </div>
 
     <h2 class="page-title">Transaction History</h2>
+    <form class="row g-3 align-items-end mb-4" method="get" action="/transactions/statement">
+        <div class="col-sm-5 col-md-3">
+            <label for="fromDate" class="form-label">From date</label>
+            <input type="date" class="form-control" id="fromDate" name="fromDate">
+        </div>
+        <div class="col-sm-5 col-md-3">
+            <label for="toDate" class="form-label">To date</label>
+            <input type="date" class="form-control" id="toDate" name="toDate">
+        </div>
+        <div class="col-sm-2 col-md-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-download me-1"></i> Download CSV Statement
+            </button>
+        </div>
+        <div class="col-12">
+            <small class="text-muted">Leave the dates blank to download all transactions.</small>
+        </div>
+    </form>
     <div class="table-responsive table-container">
         <table class="table table-striped">
             <thead>

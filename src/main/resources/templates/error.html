@@ -136,6 +136,15 @@
             background: #f8fafc;
             color: var(--dark);
         }
+
+        .error-card form {
+            margin: 0;
+        }
+
+        .btn-action[type="submit"] {
+            cursor: pointer;
+            font: inherit;
+        }
     </style>
 </head>
 <body>
@@ -153,12 +162,23 @@
         The page you attempted to access cannot be found or is restricted. For your security, access was blocked.
     </p>
 
-    <!-- Navigation based on authentication state -->
-    <div th:if="${isLoggedIn}">
-        <a href="/dashboard" class="btn-action btn-primary-action">
+    <div th:if="${isAdmin}">
+        <a href="/admin/dashboard" class="btn-action btn-primary-action">
+            <i class="fas fa-home"></i> Return to Admin Dashboard
+        </a>
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn-action btn-secondary-action">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${isLoggedIn and !isAdmin}">
+        <a href="/dashboard?nav=click" class="btn-action btn-primary-action">
             <i class="fas fa-home"></i> Return to Secure Dashboard
         </a>
-        <a href="/profile" class="btn-action btn-secondary-action">
+        <a href="/profile?nav=click" class="btn-action btn-secondary-action">
             <i class="fas fa-user"></i> Go to Profile
         </a>
     </div>

@@ -4,7 +4,9 @@ import com.example.bankapp.model.Account;
 import com.example.bankapp.model.Transaction;
 import com.example.bankapp.repository.AccountRepository;
 import com.example.bankapp.repository.TransactionRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,10 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -31,12 +36,21 @@ public class AccountService implements UserDetailsService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Value("${bank.admin.username:}")
+    private String adminUsername;
+
+    @Value("${bank.admin.password:}")
+    private String adminPassword;
+
     public Account findAccountByUsername(String username) {
         return accountRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
     public void registerAccount(String username, String password) {
+        if (isAdminConfigured() && adminUsername.equals(username)) {
+            throw new RuntimeException("This username is reserved");
+        }
         if(accountRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("Account already exists");
         }
@@ -51,7 +65,6 @@ public class AccountService implements UserDetailsService {
     }
 
     public void deposit(Account account, BigDecimal amount) {
-
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Amount must be greater than zero");
         }
@@ -71,7 +84,6 @@ public class AccountService implements UserDetailsService {
     }
 
     public void withdraw(Account account, BigDecimal amount) {
-
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Amount must be greater than zero");
         } else {
@@ -93,32 +105,71 @@ public class AccountService implements UserDetailsService {
     }
 
     public List<Transaction> getTransactionHistory(Account account) {
-        return transactionRepository.findByAccountId(account.getId());
+        return transactionRepository.findByAccountIdOrderByTimestampAsc(account.getId());
+    }
+
+    public List<Transaction> getTransactionHistory(Account account, LocalDate fromDate, LocalDate toDate) {
+        LocalDateTime start = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime end = toDate != null ? toDate.atTime(LocalTime.MAX) : null;
+
+        if (start != null && end != null) {
+            return transactionRepository.findByAccountIdAndTimestampBetweenOrderByTimestampAsc(
+                    account.getId(), start, end);
+        }
+        if (start != null) {
+            return transactionRepository.findByAccountIdAndTimestampGreaterThanEqualOrderByTimestampAsc(
+                    account.getId(), start);
+        }
+        if (end != null) {
+            return transactionRepository.findByAccountIdAndTimestampLessThanEqualOrderByTimestampAsc(
+                    account.getId(), end);
+        }
+        return getTransactionHistory(account);
+    }
+
+    public List<CustomerAccountView> getCustomerAccounts() {
+        return accountRepository.findAll(Sort.by(Sort.Direction.ASC, "username")).stream()
+                .map(account -> new CustomerAccountView(
+                        account.getId(),
+                        account.getUsername(),
+                        account.getFullName(),
+                        account.getEmail(),
+                        account.getBalance() != null ? account.getBalance() : BigDecimal.ZERO))
+                .collect(Collectors.toList());
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account account = findAccountByUsername(username);
-        if(account == null) {
-            throw new UsernameNotFoundException("Account not found");
+        if (isAdminConfigured() && adminUsername.equals(username)) {
+            return org.springframework.security.core.userdetails.User.withUsername(adminUsername)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .roles("ADMIN")
+                    .build();
         }
 
-        return new Account(
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+        Account userDetails = new Account(
                 account.getUsername(),
                 account.getPassword(),
                 account.getBalance(),
                 account.getTransactions(),
                 authorities()
         );
+        userDetails.setId(account.getId());
+        return userDetails;
     }
 
     public Collection<? extends GrantedAuthority> authorities(){
-        return Arrays.asList(new SimpleGrantedAuthority("User"));
+        return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    private boolean isAdminConfigured() {
+        return adminUsername != null && !adminUsername.isBlank()
+                && adminPassword != null && !adminPassword.isBlank();
     }
 
     public void transferAmount(Account fromAccount, String toUsername, BigDecimal amount) {
-
-
         if(amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Amount must be greater than zero");
         } else {
@@ -129,7 +180,6 @@ public class AccountService implements UserDetailsService {
 
         Account toAccount = accountRepository.findByUsername(toUsername)
                 .orElseThrow(() -> new RuntimeException("Recipient account not found"));
-
         // Deduct from main account
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         accountRepository.save(fromAccount);
@@ -175,4 +225,5 @@ public class AccountService implements UserDetailsService {
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
     }
+
 }

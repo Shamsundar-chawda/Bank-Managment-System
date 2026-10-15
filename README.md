@@ -8,9 +8,10 @@ FEATURES
 - User Registration and Login Authentication
 - Secure Password Encryption using Spring Security
 - Deposit and Withdrawal Operations
+- Downloadable CSV Account Statements with Optional Date Filters
 - Real-time Balance Management
 - Transaction History Tracking
-- Admin Login Page
+- Separate Admin Login Portal
 - Responsive Banking Dashboard
 - MySQL Database Integration
 - MVC Architecture using Spring Boot
@@ -50,9 +51,24 @@ FEATURES
 - Fund Transfer Between Accounts
 - Email Notifications
 - OTP Verification
-- Account Statement PDF Download
-- Role-based Admin Dashboard
 - JWT Authentication
+
+- ## Admin Portal
+
+Set your admin credentials once in a local `.env` file:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+Replace the example values with your own admin username and a strong, unique password. The `.env` file is ignored by Git, so credentials are not committed. After saving it, start the application normally:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The app loads `.env` on startup, so you do not need to set the credentials again when restarting it from the project folder. Existing PowerShell environment variables still take precedence over `.env`. Open `/admin` to sign in. Administrators are directed to the admin workspace, where they can view customer account information.
 
 - ## Screenshots
 
@@ -74,6 +90,3 @@ FEATURES
 
 - Transaction history
 - <img width="1329" height="605" alt="image" src="https://github.com/user-attachments/assets/082cf560-4c75-4f3e-a24a-07466440526e" />
-
-
-

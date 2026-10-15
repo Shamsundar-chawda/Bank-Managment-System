@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -35,22 +37,45 @@ public class SecurityConfig implements WebMvcConfigurer{
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
 
-                .csrf(csrf-> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/register", "/login", "/admin", "/log", "/error", "/h2-console/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/admin/dashboard").hasRole("ADMIN")
+                        .requestMatchers("/dashboard", "/transactions/**", "/deposit", "/withdraw",
+                                "/transfer", "/profile", "/profile/**").hasRole("USER")
+                        .requestMatchers("/register", "/login", "/admin", "/error", "/h2-console/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptions -> exceptions.accessDeniedHandler((request, response, exception) -> {
+                    boolean isAdmin = org.springframework.security.core.context.SecurityContextHolder
+                            .getContext().getAuthentication().getAuthorities()
+                            .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                    if (isAdmin) {
+                        response.sendRedirect("/admin/dashboard");
+                    } else {
+                        response.sendError(org.springframework.http.HttpStatus.FORBIDDEN.value());
+                    }
+                }).defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/admin"),
+                        new AntPathRequestMatcher("/admin/**")))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler((request, response, authentication) -> {
+                            boolean isAdmin = authentication.getAuthorities()
+                                    .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                            response.sendRedirect(isAdmin ? "/admin/dashboard" : "/dashboard");
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            String errorPage = "true".equals(request.getParameter("adminLogin"))
+                                    ? "/admin?error" : "/login?error";
+                            response.sendRedirect(errorPage);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
@@ -83,4 +108,3 @@ public class SecurityConfig implements WebMvcConfigurer{
                 .addPathPatterns("/dashboard", "/transactions", "/profile");
     }
 }
-

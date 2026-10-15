@@ -2,56 +2,64 @@ package com.example.bankapp.controller;
 
 
 import com.example.bankapp.model.Account;
+import com.example.bankapp.model.Transaction;
 import com.example.bankapp.service.AccountService;
+import com.example.bankapp.service.AccountStatementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Controller
 public class BankController {
 
     @Autowired
     private AccountService accountService;
-    // Hardcoded credentials (DEMO ONLY - NEVER DO THIS IN PRODUCTION)
-    private static final String ADMIN_USERNAME = "BankEase";
-    private static final String ADMIN_PASSWORD = "BankEase@123";
+
+    @Autowired
+    private AccountStatementService accountStatementService;
 
     @GetMapping("/")
     public String index() {
-        return "redirect:/dashboard"; 
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        return isAdmin ? "redirect:/admin/dashboard" : "redirect:/dashboard";
     }
 
     @GetMapping("/admin")
     public String adminLoginPage() {
-        return "admin_login"; 
-    }
-
-    @PostMapping("/log")
-    public String handleLogin(
-            @RequestParam String username,
-            @RequestParam String password,
-            Model model) {
-
-        if (ADMIN_USERNAME.equals(username) && ADMIN_PASSWORD.equals(password)) {
-            return "redirect:/login"; // Redirect to dashboard on success
-        } else {
-            model.addAttribute("error", "Invalid credentials!");
-            return "admin_login"; // Show error on failure
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            return "redirect:/admin/dashboard";
         }
+        return "admin_login";
     }
-    
-    
-    
+
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard(Model model) {
+        model.addAttribute("customerAccounts", accountService.getCustomerAccounts());
+        return "admin_dashboard";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         model.addAttribute("account", account);
         return "dashboard";
@@ -82,8 +90,7 @@ public class BankController {
 
     @PostMapping("/deposit")
     public String deposit(@RequestParam BigDecimal amount, Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         try {
             accountService.deposit(account, amount);
@@ -99,8 +106,7 @@ public class BankController {
 
     @PostMapping("/withdraw")
     public String withdraw(@RequestParam BigDecimal amount, Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         try {
             accountService.withdraw(account, amount);
@@ -115,17 +121,35 @@ public class BankController {
 
     @GetMapping("/transactions")
     public String transactionHistory(Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         model.addAttribute("transactions", accountService.getTransactionHistory(account));
         return "transactions";
     }
 
+    @GetMapping("/transactions/statement")
+    public ResponseEntity<byte[]> downloadAccountStatement(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Start date must not be after end date");
+        }
+
+        Account account = getCurrentAccount();
+        List<Transaction> transactions = accountService.getTransactionHistory(account, fromDate, toDate);
+        byte[] statement = accountStatementService.generateCsv(account, transactions, fromDate, toDate);
+        String filename = "account-statement-" + account.getId() + ".csv";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(statement);
+    }
+
     @PostMapping("/transfer")
     public String transferAmount(@RequestParam String toUsername, @RequestParam BigDecimal amount, Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account fromAccount = accountService.findAccountByUsername(username);
+        Account fromAccount = getCurrentAccount();
 
         try {
             accountService.transferAmount(fromAccount, toUsername, amount);
@@ -142,8 +166,7 @@ public class BankController {
     public String profile(Model model,
                           @RequestParam(required = false) String success,
                           @RequestParam(required = false) String error) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         model.addAttribute("account", account);
         if (success != null) {
@@ -161,8 +184,7 @@ public class BankController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String address) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         try {
             accountService.updateProfile(account, fullName, email, phone, address);
@@ -177,8 +199,7 @@ public class BankController {
             @RequestParam String currentPassword,
             @RequestParam String newPassword,
             @RequestParam String confirmPassword) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
+        Account account = getCurrentAccount();
 
         if (!newPassword.equals(confirmPassword)) {
             return "redirect:/profile?error=New+passwords+do+not+match!";
@@ -190,5 +211,10 @@ public class BankController {
         } catch (RuntimeException e) {
             return "redirect:/profile?error=" + e.getMessage();
         }
+    }
+
+    private Account getCurrentAccount() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return accountService.findAccountByUsername(username);
     }
 }
